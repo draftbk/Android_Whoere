@@ -1,8 +1,15 @@
 package mr_immortalz.com.modelqq;
 
+import android.Manifest;
 import android.app.Activity;
+import android.content.Context;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.SparseArray;
@@ -18,6 +25,7 @@ import android.widget.Toast;
 
 import java.lang.reflect.Field;
 
+import master.flame.danmaku.danmaku.model.Danmaku;
 import mr_immortalz.com.modelqq.been.Info;
 import mr_immortalz.com.modelqq.custom.CustomViewPager;
 import mr_immortalz.com.modelqq.custom.RadarViewGroup;
@@ -30,6 +38,10 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
     private CustomViewPager viewPager;
     private RelativeLayout ryContainer;
     private RadarViewGroup radarViewGroup;
+    private LocationManager manager;
+    private double lat;
+    private double lon;
+    private Location location;
     private int[] mImgs = {R.drawable.len, R.drawable.leo, R.drawable.lep,
             R.drawable.leq, R.drawable.ler, R.drawable.les, R.drawable.mln, R.drawable.mmz, R.drawable.mna,
             R.drawable.mnj, R.drawable.leo, R.drawable.leq, R.drawable.les, R.drawable.lep};
@@ -42,6 +54,7 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        getGps();
         initView();
         initData();
 
@@ -91,6 +104,36 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
         ryContainer = (RelativeLayout) findViewById(R.id.ry_container);
     }
 
+    private void getGps() {
+        manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        //检查权限
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        //如果要用GPS就把下面的NETWORK_PROVIDER改成GPS_PROVIDER,但是GPS不稳定
+
+        location = manager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+        manager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 5000, 1, locationLinstener);
+    }
+    LocationListener locationLinstener=new LocationListener() {
+        @Override
+        public void onLocationChanged(Location location) {
+            showLocation(location);
+        }
+        @Override
+        public void onStatusChanged(String provider, int status, Bundle extras) {
+        }
+        @Override
+        public void onProviderEnabled(String provider) {
+        }
+        @Override
+        public void onProviderDisabled(String provider) {
+        }
+    };
+    private void showLocation(Location location) {
+        lat=location.getLatitude();
+        lon=location.getLongitude();
+    }
     /**
      * 设置ViewPager切换速度
      *
@@ -132,6 +175,7 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
             LogUtil.m("位置 " + mPosition);
             viewPager.setSpeed(0);
         }
+        Danmaku danmaku=new Danmaku("nihai");
     }
 
     @Override
@@ -190,4 +234,5 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
         }
 
     }
+
 }

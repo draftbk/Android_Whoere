@@ -23,4 +23,6 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:23.1.1'
+//    依赖B站的弹幕github
+    compile 'com.github.ctiao:DanmakuFlameMaster:0.5.5'
 }
