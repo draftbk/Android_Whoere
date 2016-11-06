@@ -24,11 +24,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.lang.reflect.Field;
+import java.util.LinkedList;
 
 import master.flame.danmaku.danmaku.model.Danmaku;
 import mr_immortalz.com.modelqq.been.Info;
 import mr_immortalz.com.modelqq.custom.CustomViewPager;
 import mr_immortalz.com.modelqq.custom.RadarViewGroup;
+import mr_immortalz.com.modelqq.slideWord.BarrageRelativeLayout;
 import mr_immortalz.com.modelqq.utils.FixedSpeedScroller;
 import mr_immortalz.com.modelqq.utils.LogUtil;
 import mr_immortalz.com.modelqq.utils.ZoomOutPageTransformer;
@@ -57,6 +59,7 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
         getGps();
         initView();
         initData();
+        initSlide();
 
         /**
          * 将Viewpager所在容器的事件分发交给ViewPager
@@ -85,6 +88,20 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
         }, 1500);
         radarViewGroup.setiRadarClickListener(this);
     }
+
+    private void initSlide() {
+        BarrageRelativeLayout mBarrageRelativeLayout = (BarrageRelativeLayout) findViewById(R.id.barrageView);
+
+        String[] itemText = {"zhangphil@csdn 0", "zhangphil 1", "zhang phil 2","zhang 3","phil 4","zhangphil ... 5", "***zhangphil 6", "zhang phil csdn 7", "zhang ... phil 8", "phil... 9", "http://blog.csdn.net/zhangphil 10"};
+        LinkedList<String> texts=new LinkedList<String>();
+        for(int i=0;i<itemText.length;i++){
+            texts.add(itemText[i]);
+        }
+        mBarrageRelativeLayout.setBarrageTexts(texts);
+
+        mBarrageRelativeLayout.show(BarrageRelativeLayout.RANDOM_SHOW);
+    }
+
 
     private void initData() {
         for (int i = 0; i < mImgs.length; i++) {

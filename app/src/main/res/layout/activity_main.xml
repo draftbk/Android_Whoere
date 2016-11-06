@@ -37,6 +37,11 @@
             android:layout_marginRight="120dp"
             />
     </RelativeLayout>
+    <mr_immortalz.com.modelqq.slideWord.BarrageRelativeLayout
+        android:id="@+id/barrageView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/transparent" />
 
 
 </RelativeLayout>
