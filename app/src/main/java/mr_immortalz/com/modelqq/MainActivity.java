@@ -104,6 +104,7 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
 
 
     private void initData() {
+
         for (int i = 0; i < mImgs.length; i++) {
             Info info = new Info();
             info.setPortraitId(mImgs[i]);
