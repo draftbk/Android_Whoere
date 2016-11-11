@@ -65,14 +65,14 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
     private SparseArray<Info> mDatas = new SparseArray<>();
     private ArrayList<String> otherID=new ArrayList<String>();
     private boolean isFirst=true;
-    private user user;
+    private user thisUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Bmob.initialize(this, "1b2551067b01b0765269eb6f4c4efd2c");
-        user=new user();
+        thisUser=new user();
         getGps();
         initView();
         initData();
@@ -138,7 +138,7 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
 //            mDatas.put(i, info);
 //            addData("我自己", (double) 0);
 //        }
-        addData("我自己", (double) 0);
+
 
     }
 
@@ -181,11 +181,11 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
         lat=location.getLatitude();
         lon=location.getLongitude();
 //        这里要上传位置信息并且得到周围的人
-        user.setUser_id((lat+"").substring(2,4)+(lon+"").substring(2,4)+(Math.random()*(10000)));
-        user.setName("路人甲");
-        user.setLat(lat+"");
-        user.setLon(lon+"");
-        user.save(new SaveListener<String>() {
+        thisUser.setUser_id((lat+"").substring(2,4)+(lon+"").substring(2,4)+(Math.random()*(10000)));
+        thisUser.setName("路人甲");
+        thisUser.setLat(lat+"");
+        thisUser.setLon(lon+"");
+        thisUser.save(new SaveListener<String>() {
             @Override
             public void done(String objectId,BmobException e) {
                 if(e==null){
@@ -215,8 +215,8 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
                         Double otherLon= Double.valueOf(user.getLon());
 //                        得到距离
                         Double dis=LocationTools.getDistance(lon,lat,otherLon,otherLat);
-                        if (dis<2000){
-//                            addData(user.getName(),dis,i);
+                        if (dis<2000&&!thisUser.getUser_id().equals(user.getUser_id())){
+                            addData(user.getName(),dis);
                             toast("change");
                             otherID.add(user.getUser_id());
                             mAdapter.notifyDataSetChanged();
@@ -370,12 +370,12 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
     @Override
     protected void onDestroy() {
 
-        user.delete(new UpdateListener() {
+        thisUser.delete(new UpdateListener() {
 
             @Override
             public void done(BmobException e) {
                 if(e==null){
-                    toast("退出并删除临时用户:"+user.getName());
+                    toast("退出并删除临时用户:"+thisUser.getName());
                 }else{
                     toast("退出");
                 }
