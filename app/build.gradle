@@ -17,12 +17,23 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    sourceSets {
+        main.jniLibs.srcDirs = ['libs']
+    }
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile fileTree(include: ['*.jar'], dir: 'libs')
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:23.1.1'
-//    依赖B站的弹幕github
+    //    依赖B站的弹幕github
     compile 'com.github.ctiao:DanmakuFlameMaster:0.5.5'
+    compile files('libs/gson-2.6.2.jar')
+    compile files('libs/BmobSDK_3.5.3_20161109.jar')
+    compile files('libs/okhttp-3.3.1.jar')
+    compile files('libs/okio-1.7.0.jar')
+    compile files('libs/org.apache.http.legacy.jar')
+    compile files('libs/rxjava-1.1.6.jar')
+    compile files('libs/rxandroid-1.2.0.jar')
+
 }

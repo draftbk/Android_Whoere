@@ -12,6 +12,7 @@ import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -25,9 +26,17 @@ import android.widget.Toast;
 
 import java.lang.reflect.Field;
 import java.util.LinkedList;
+import java.util.List;
 
+import cn.bmob.v3.Bmob;
+import cn.bmob.v3.BmobQuery;
+import cn.bmob.v3.exception.BmobException;
+import cn.bmob.v3.listener.FindListener;
+import cn.bmob.v3.listener.SaveListener;
+import cn.bmob.v3.listener.UpdateListener;
 import master.flame.danmaku.danmaku.model.Danmaku;
 import mr_immortalz.com.modelqq.been.Info;
+import mr_immortalz.com.modelqq.been.user;
 import mr_immortalz.com.modelqq.custom.CustomViewPager;
 import mr_immortalz.com.modelqq.custom.RadarViewGroup;
 import mr_immortalz.com.modelqq.slideWord.BarrageRelativeLayout;
@@ -51,11 +60,15 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
     private int mPosition;
     private FixedSpeedScroller scroller;
     private SparseArray<Info> mDatas = new SparseArray<>();
+    private boolean isFirst=true;
+    private user user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Bmob.initialize(this, "1b2551067b01b0765269eb6f4c4efd2c");
+        user=new user();
         getGps();
         initView();
         initData();
@@ -129,14 +142,17 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
             return;
         }
         //如果要用GPS就把下面的NETWORK_PROVIDER改成GPS_PROVIDER,但是GPS不稳定
-
         location = manager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
         manager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 5000, 1, locationLinstener);
     }
     LocationListener locationLinstener=new LocationListener() {
         @Override
         public void onLocationChanged(Location location) {
-            showLocation(location);
+            if (isFirst){
+                loadLocation(location);
+                isFirst=false;
+            }
+
         }
         @Override
         public void onStatusChanged(String provider, int status, Bundle extras) {
@@ -148,10 +164,59 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
         public void onProviderDisabled(String provider) {
         }
     };
-    private void showLocation(Location location) {
+    private void loadLocation(Location location) {
         lat=location.getLatitude();
         lon=location.getLongitude();
+//        这里要上传位置信息并且得到周围的人
+
+        user.setUser_id((lat+"").substring(2,4)+(lon+"").substring(2,4)+(Math.random()*(10000)));
+        user.setName("路人甲");
+        user.setLat(lat+"");
+        user.setLon(lon+"");
+        user.save(new SaveListener<String>() {
+            @Override
+            public void done(String objectId,BmobException e) {
+                if(e==null){
+                    toast("添加数据成功，返回objectId为："+objectId);
+                    searchAround();
+                }else{
+                    toast("创建数据失败：" + e.getMessage());
+                }
+            }
+        });
     }
+
+    private void searchAround() {
+        BmobQuery<user> query = new BmobQuery<user>();
+//查询playerName叫“比目”的数据
+        query.addWhereEqualTo("playerName", "比目");
+//返回50条数据，如果不加上这条语句，默认返回10条数据
+        query.setLimit(50);
+//执行查询方法
+        query.findObjects(new FindListener<user>() {
+
+            @Override
+            public void done(List<user> object, BmobException e) {
+                if(e==null){
+                    toast("查询成功：共"+object.size()+"条数据。");
+                    for (user user : object) {
+                        //获得playerName的信息
+                        Double otherLat= Double.valueOf(user.getLat());
+                        Double otherLon= Double.valueOf(user.getLon());
+
+
+                    }
+                }else{
+                    Log.i("bmob","失败："+e.getMessage()+","+e.getErrorCode());
+                }
+            }
+        });
+    }
+
+    private void toast(String s) {
+        Toast.makeText(MainActivity.this,s,Toast.LENGTH_SHORT).show();
+    }
+
     /**
      * 设置ViewPager切换速度
      *
@@ -251,6 +316,45 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
             container.removeView(view);
         }
 
+
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
+
+    @Override
+    protected void onRestart() {
+        toast(isFirst+"");
+        super.onRestart();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+    }
+
+    @Override
+    protected void onDestroy() {
+
+        user.delete(new UpdateListener() {
+
+            @Override
+            public void done(BmobException e) {
+                if(e==null){
+                    toast("退出并删除临时用户:"+user.getName());
+                }else{
+                    toast("退出");
+                }
+            }
+
+        });
+        super.onDestroy();
+    }
 }
