@@ -25,6 +25,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -40,6 +41,7 @@ import mr_immortalz.com.modelqq.been.user;
 import mr_immortalz.com.modelqq.custom.CustomViewPager;
 import mr_immortalz.com.modelqq.custom.RadarViewGroup;
 import mr_immortalz.com.modelqq.slideWord.BarrageRelativeLayout;
+import mr_immortalz.com.modelqq.tools.LocationTools;
 import mr_immortalz.com.modelqq.utils.FixedSpeedScroller;
 import mr_immortalz.com.modelqq.utils.LogUtil;
 import mr_immortalz.com.modelqq.utils.ZoomOutPageTransformer;
@@ -50,16 +52,18 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
     private RelativeLayout ryContainer;
     private RadarViewGroup radarViewGroup;
     private LocationManager manager;
+    private ViewpagerAdapter mAdapter;
     private double lat;
     private double lon;
     private Location location;
     private int[] mImgs = {R.drawable.len, R.drawable.leo, R.drawable.lep,
             R.drawable.leq, R.drawable.ler, R.drawable.les, R.drawable.mln, R.drawable.mmz, R.drawable.mna,
             R.drawable.mnj, R.drawable.leo, R.drawable.leq, R.drawable.les, R.drawable.lep};
-    private String[] mNames = {"ImmortalZ", "唐马儒", "王尼玛", "张全蛋", "蛋花", "王大锤", "叫兽", "哆啦A梦"};
+    private String[] mNames = {"是谁", "唐马儒", "王尼玛", "张全蛋", "蛋花", "王大锤", "叫兽", "哆啦A梦"};
     private int mPosition;
     private FixedSpeedScroller scroller;
     private SparseArray<Info> mDatas = new SparseArray<>();
+    private ArrayList<String> otherID=new ArrayList<String>();
     private boolean isFirst=true;
     private user user;
 
@@ -83,16 +87,8 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
                 return viewPager.dispatchTouchEvent(event);
             }
         });
-        ViewpagerAdapter mAdapter = new ViewpagerAdapter();
-        viewPager.setAdapter(mAdapter);
-        //设置缓存数为展示的数目
-        viewPager.setOffscreenPageLimit(mImgs.length);
-        viewPager.setPageMargin(getResources().getDimensionPixelOffset(R.dimen.viewpager_margin));
-        //设置切换动画
-        viewPager.setPageTransformer(true, new ZoomOutPageTransformer());
-        viewPager.addOnPageChangeListener(this);
-        setViewPagerSpeed(250);
 
+        changeView();
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -100,6 +96,20 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
             }
         }, 1500);
         radarViewGroup.setiRadarClickListener(this);
+
+    }
+
+    private void changeView() {
+        mAdapter = new ViewpagerAdapter();
+        viewPager.setAdapter(mAdapter);
+        //设置缓存数为展示的数目
+        viewPager.setOffscreenPageLimit(mDatas.size());
+        viewPager.setPageMargin(getResources().getDimensionPixelOffset(R.dimen.viewpager_margin));
+        //设置切换动画
+        viewPager.setPageTransformer(true, new ZoomOutPageTransformer());
+        viewPager.addOnPageChangeListener(this);
+        setViewPagerSpeed(250);
+
     }
 
     private void initSlide() {
@@ -118,15 +128,18 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
 
     private void initData() {
 
-        for (int i = 0; i < mImgs.length; i++) {
-            Info info = new Info();
-            info.setPortraitId(mImgs[i]);
-            info.setAge(((int) Math.random() * 25 + 16) + "岁");
-            info.setName(mNames[(int) (Math.random() * mNames.length)]);
-            info.setSex(i % 3 == 0 ? false : true);
-            info.setDistance(Math.round((Math.random() * 10) * 100) / 100);
-            mDatas.put(i, info);
-        }
+//        for (int i = 0; i < mImgs.length; i++) {
+//            Info info = new Info();
+//            info.setPortraitId(mImgs[i]);
+//            info.setAge(((int) Math.random() * 25 + 16) + "岁");
+//            info.setName(mNames[(int) (Math.random() * mNames.length)]);
+//            info.setSex(i % 3 == 0 ? false : true);
+//            info.setDistance(Math.round((Math.random() * 10) * 100) / 100);
+//            mDatas.put(i, info);
+//            addData("我自己", (double) 0);
+//        }
+        addData("我自己", (double) 0);
+
     }
 
     private void initView() {
@@ -168,7 +181,6 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
         lat=location.getLatitude();
         lon=location.getLongitude();
 //        这里要上传位置信息并且得到周围的人
-
         user.setUser_id((lat+"").substring(2,4)+(lon+"").substring(2,4)+(Math.random()*(10000)));
         user.setName("路人甲");
         user.setLat(lat+"");
@@ -188,8 +200,6 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
 
     private void searchAround() {
         BmobQuery<user> query = new BmobQuery<user>();
-//查询playerName叫“比目”的数据
-        query.addWhereEqualTo("playerName", "比目");
 //返回50条数据，如果不加上这条语句，默认返回10条数据
         query.setLimit(50);
 //执行查询方法
@@ -203,14 +213,31 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
                         //获得playerName的信息
                         Double otherLat= Double.valueOf(user.getLat());
                         Double otherLon= Double.valueOf(user.getLon());
-
-
+//                        得到距离
+                        Double dis=LocationTools.getDistance(lon,lat,otherLon,otherLat);
+                        if (dis<2000){
+//                            addData(user.getName(),dis,i);
+                            toast("change");
+                            otherID.add(user.getUser_id());
+                            mAdapter.notifyDataSetChanged();
+                        }
                     }
                 }else{
                     Log.i("bmob","失败："+e.getMessage()+","+e.getErrorCode());
                 }
             }
         });
+    }
+
+    private void addData(String name,Double dis) {
+        Info info = new Info();
+        info.setPortraitId(mImgs[(int) (1+Math.random()*12)]);
+        info.setAge(((int) Math.random() * 25 + 16) + "岁");
+        info.setName(name);
+        info.setSex(Math.random()*12 % 3 == 0 ? false : true);
+        info.setDistance((float) (dis/1000));
+        mDatas.put(mDatas.size(), info);
+        Log.d("test","....."+1);
     }
 
     private void toast(String s) {
@@ -302,7 +329,7 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
 
         @Override
         public int getCount() {
-            return mImgs.length;
+            return mDatas.size();
         }
 
         @Override
