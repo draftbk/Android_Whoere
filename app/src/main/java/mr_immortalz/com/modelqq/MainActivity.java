@@ -3,15 +3,19 @@ package mr_immortalz.com.modelqq;
 import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
@@ -19,11 +23,14 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -66,6 +73,7 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
     private ArrayList<String> otherID=new ArrayList<String>();
     private boolean isFirst=true;
     private user thisUser;
+    private Handler han;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,6 +81,7 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
         setContentView(R.layout.activity_main);
         Bmob.initialize(this, "1b2551067b01b0765269eb6f4c4efd2c");
         thisUser=new user();
+        addData("我",0.0);
         getGps();
         initView();
         initData();
@@ -85,6 +94,17 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 return viewPager.dispatchTouchEvent(event);
+            }
+        });
+//        初始化handler
+        han=new Handler(new Handler.Callback() {
+            @Override
+            public boolean handleMessage(Message msg) {
+//                toast("我在监听"+msg.what);
+                searchAround();
+                mAdapter.notifyDataSetChanged();
+
+                return false;
             }
         });
 
@@ -190,12 +210,30 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
             public void done(String objectId,BmobException e) {
                 if(e==null){
                     toast("添加数据成功，返回objectId为："+objectId);
-                    searchAround();
+                    searchThread();
                 }else{
                     toast("创建数据失败：" + e.getMessage());
                 }
             }
         });
+    }
+
+    private void searchThread() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (true){
+                    try {
+                        han.sendEmptyMessage(1);
+                        Thread.sleep(2000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+            }
+        }).start();
+
     }
 
     private void searchAround() {
@@ -204,11 +242,9 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
         query.setLimit(50);
 //执行查询方法
         query.findObjects(new FindListener<user>() {
-
             @Override
             public void done(List<user> object, BmobException e) {
                 if(e==null){
-                    toast("查询成功：共"+object.size()+"条数据。");
                     for (user user : object) {
                         //获得playerName的信息
                         Double otherLat= Double.valueOf(user.getLat());
@@ -216,17 +252,32 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
 //                        得到距离
                         Double dis=LocationTools.getDistance(lon,lat,otherLon,otherLat);
                         if (dis<2000&&!thisUser.getUser_id().equals(user.getUser_id())){
-                            addData(user.getName(),dis);
-                            toast("change");
-                            otherID.add(user.getUser_id());
-                            mAdapter.notifyDataSetChanged();
+                            if (!isInOtherId(user.getUser_id())){
+                                addData(user.getName(),dis);
+                                otherID.add(user.getUser_id());
+//                                han.sendEmptyMessage(1);
+                                mAdapter.notifyDataSetChanged();
+
+                            }
                         }
                     }
+
                 }else{
                     Log.i("bmob","失败："+e.getMessage()+","+e.getErrorCode());
+
                 }
             }
         });
+    }
+
+    private boolean isInOtherId(String id) {
+        boolean b=false;
+        for (int i=0;i<otherID.size();i++){
+            if (id.equals(otherID.get(i))){
+                b=true;
+            }
+        }
+        return b;
     }
 
     private void addData(String name,Double dis) {
@@ -234,7 +285,7 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
         info.setPortraitId(mImgs[(int) (1+Math.random()*12)]);
         info.setAge(((int) Math.random() * 25 + 16) + "岁");
         info.setName(name);
-        info.setSex(Math.random()*12 % 3 == 0 ? false : true);
+        info.setSex((Math.random()*10)% 3 == 0 ? false : true);
         info.setDistance((float) (dis/1000));
         mDatas.put(mDatas.size(), info);
         Log.d("test","....."+1);
@@ -321,6 +372,10 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
                 @Override
                 public void onClick(View v) {
                     Toast.makeText(MainActivity.this, "这是 " + info.getName() + " >.<", Toast.LENGTH_SHORT).show();
+                    if (info.getName().equals("我")){
+                        toast("我要发消息");
+                        showMessageDialog();
+                    }
                 }
             });
             container.addView(view);
@@ -383,5 +438,30 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
 
         });
         super.onDestroy();
+    }
+
+    private void showMessageDialog() {
+        //弹出框
+        final AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+        //    通过LayoutInflater来加载一个xml的布局文件作为一个View对象
+        View view = LayoutInflater.from(MainActivity.this).inflate(R.layout.dialog_message, null);
+        //    设置我们自己定义的布局文件作为弹出框的Content
+        builder.setView(view);
+        builder.setPositiveButton("发送", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                loadChat();
+            }
+        });
+        builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+            }
+        });
+        builder.show();
+    }
+
+    private void loadChat() {
+
     }
 }

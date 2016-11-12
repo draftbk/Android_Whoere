@@ -10,6 +10,19 @@ public class Info {
     private String age;//年龄
     private boolean sex;//false为男，true为女
     private float distance;//距离
+    private String userId;
+
+    public boolean isSex() {
+        return sex;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
 
     public int getPortraitId() {
         return portraitId;
