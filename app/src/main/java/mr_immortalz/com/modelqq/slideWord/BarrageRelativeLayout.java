@@ -35,8 +35,9 @@ public class BarrageRelativeLayout extends RelativeLayout {
                 showBarrageItem(item);
 
                 //每个弹幕产生的间隔时间随机
-                int duration = (int) ((BARRAGE_GAP_MAX_DURATION - BARRAGE_GAP_MIN_DURATION) * Math.random());
-                this.sendEmptyMessageDelayed(RANDOM_SHOW, duration);
+//                下面两句就是弹幕一直产生的原因--注销就没事了~
+//                int duration = (int) ((BARRAGE_GAP_MAX_DURATION - BARRAGE_GAP_MIN_DURATION) * Math.random());
+//                this.sendEmptyMessageDelayed(RANDOM_SHOW, duration);
             }
 
 

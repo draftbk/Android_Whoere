@@ -15,7 +15,7 @@
 
 
     <EditText
-        android:id="@+id/edit_temp"
+        android:id="@+id/edit_msg"
         android:gravity="center"
         android:hint="填写要发送的弹幕"
         android:layout_marginTop="8dp"

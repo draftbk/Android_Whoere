@@ -32,7 +32,11 @@ import android.widget.Toast;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -43,6 +47,7 @@ import cn.bmob.v3.listener.FindListener;
 import cn.bmob.v3.listener.SaveListener;
 import cn.bmob.v3.listener.UpdateListener;
 import master.flame.danmaku.danmaku.model.Danmaku;
+import mr_immortalz.com.modelqq.been.Chat;
 import mr_immortalz.com.modelqq.been.Info;
 import mr_immortalz.com.modelqq.been.user;
 import mr_immortalz.com.modelqq.custom.CustomViewPager;
@@ -60,6 +65,8 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
     private RadarViewGroup radarViewGroup;
     private LocationManager manager;
     private ViewpagerAdapter mAdapter;
+    private String lastCreatedAt;
+    private BarrageRelativeLayout mBarrageRelativeLayout;
     private double lat;
     private double lon;
     private Location location;
@@ -74,6 +81,7 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
     private boolean isFirst=true;
     private user thisUser;
     private Handler han;
+    private LinkedList<String> texts;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -103,6 +111,8 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
 //                toast("我在监听"+msg.what);
                 searchAround();
                 mAdapter.notifyDataSetChanged();
+//                监听弹幕
+                getChat();
 
                 return false;
             }
@@ -133,16 +143,15 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
     }
 
     private void initSlide() {
-        BarrageRelativeLayout mBarrageRelativeLayout = (BarrageRelativeLayout) findViewById(R.id.barrageView);
+        mBarrageRelativeLayout = (BarrageRelativeLayout) findViewById(R.id.barrageView);
 
-        String[] itemText = {"zhangphil@csdn 0", "zhangphil 1", "zhang phil 2","zhang 3","phil 4","zhangphil ... 5", "***zhangphil 6", "zhang phil csdn 7", "zhang ... phil 8", "phil... 9", "http://blog.csdn.net/zhangphil 10"};
-        LinkedList<String> texts=new LinkedList<String>();
-        for(int i=0;i<itemText.length;i++){
-            texts.add(itemText[i]);
-        }
+
+        texts=new LinkedList<String>();
+        texts.add("我是萌萌的弹幕~");
+        texts.add("这是沈立凡和曹德福的计网课设~");
         mBarrageRelativeLayout.setBarrageTexts(texts);
-
         mBarrageRelativeLayout.show(BarrageRelativeLayout.RANDOM_SHOW);
+
     }
 
 
@@ -225,7 +234,7 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
                 while (true){
                     try {
                         han.sendEmptyMessage(1);
-                        Thread.sleep(2000);
+                        Thread.sleep(5000);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -375,6 +384,7 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
                     if (info.getName().equals("我")){
                         toast("我要发消息");
                         showMessageDialog();
+
                     }
                 }
             });
@@ -447,10 +457,13 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
         View view = LayoutInflater.from(MainActivity.this).inflate(R.layout.dialog_message, null);
         //    设置我们自己定义的布局文件作为弹出框的Content
         builder.setView(view);
+        final EditText editMsg= (EditText) view.findViewById(R.id.edit_msg);
+
         builder.setPositiveButton("发送", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                loadChat();
+                loadChat(editMsg.getText().toString());
+                getChat();
             }
         });
         builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
@@ -461,7 +474,63 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
         builder.show();
     }
 
-    private void loadChat() {
+    private void loadChat(String content) {
+        Chat chat = new Chat();
+        chat.setUser_id(thisUser.getUser_id());
+        chat.setContent(content);
+        chat.save(new SaveListener<String>() {
+            @Override
+            public void done(String objectId,BmobException e) {
+                if(e==null){
+                    toast("发送成功");
+                }else{
+                    toast("发送失败");
+                }
+            }
+        });
+    }
 
+    private void getChat(){
+        BmobQuery<Chat> query = new BmobQuery<Chat>();
+        query.addWhereContainedIn("user_id", otherID);
+//返回50条数据，如果不加上这条语句，默认返回10条数据
+        query.setLimit(50);
+//执行查询方法
+        query.findObjects(new FindListener<Chat>() {
+            @Override
+            public void done(List<Chat> object, BmobException e) {
+                if(e==null){
+//                    texts.clear();
+                    String x="";
+                    for (Chat chat : object) {
+                        chat.getContent();
+//                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//                        try {
+//                            Date lastDate = sdf.parse(lastCreatedAt);
+//                            Date thisDate = sdf.parse(chat.getCreatedAt());
+//                            if (lastDate.before(thisDate)){
+//                                lastCreatedAt=chat.getCreatedAt();
+//                                texts.add(chat.getContent());
+//                            }
+//                            x=x+lastDate.before(thisDate);
+//                            toast(x);
+//
+//                        } catch (ParseException e1) {
+//                            e1.printStackTrace();
+//                        }
+                        lastCreatedAt=chat.getCreatedAt();
+                        texts.add(chat.getContent());
+
+
+                    }
+                    texts.add("这是沈立凡和曹德福的计网课设~");
+                    mBarrageRelativeLayout.setBarrageTexts(texts);
+                    mBarrageRelativeLayout.show(BarrageRelativeLayout.RANDOM_SHOW);
+
+                }else{
+                    Log.i("bmob","失败："+e.getMessage()+","+e.getErrorCode());
+                }
+            }
+        });
     }
 }
