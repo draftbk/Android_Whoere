@@ -65,7 +65,7 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
     private RadarViewGroup radarViewGroup;
     private LocationManager manager;
     private ViewpagerAdapter mAdapter;
-    private String lastCreatedAt;
+    private String lastCreatedAt="2016-11-12 14:07:37";
     private BarrageRelativeLayout mBarrageRelativeLayout;
     private double lat;
     private double lon;
@@ -110,7 +110,7 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
             public boolean handleMessage(Message msg) {
 //                toast("我在监听"+msg.what);
                 searchAround();
-                mAdapter.notifyDataSetChanged();
+//                mAdapter.notifyDataSetChanged();
 //                监听弹幕
                 getChat();
 
@@ -234,7 +234,7 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
                 while (true){
                     try {
                         han.sendEmptyMessage(1);
-                        Thread.sleep(5000);
+                        Thread.sleep(2000);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -492,7 +492,6 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
 
     private void getChat(){
         BmobQuery<Chat> query = new BmobQuery<Chat>();
-        query.addWhereContainedIn("user_id", otherID);
 //返回50条数据，如果不加上这条语句，默认返回10条数据
         query.setLimit(50);
 //执行查询方法
@@ -500,26 +499,24 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
             @Override
             public void done(List<Chat> object, BmobException e) {
                 if(e==null){
-//                    texts.clear();
+                    texts.clear();
                     String x="";
                     for (Chat chat : object) {
                         chat.getContent();
-//                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-//                        try {
-//                            Date lastDate = sdf.parse(lastCreatedAt);
-//                            Date thisDate = sdf.parse(chat.getCreatedAt());
-//                            if (lastDate.before(thisDate)){
-//                                lastCreatedAt=chat.getCreatedAt();
-//                                texts.add(chat.getContent());
-//                            }
-//                            x=x+lastDate.before(thisDate);
-//                            toast(x);
-//
-//                        } catch (ParseException e1) {
-//                            e1.printStackTrace();
-//                        }
-                        lastCreatedAt=chat.getCreatedAt();
-                        texts.add(chat.getContent());
+                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                        try {
+                            Date lastDate = sdf.parse(lastCreatedAt);
+                            Date thisDate = sdf.parse(chat.getCreatedAt());
+                            if (lastDate.before(thisDate)){
+                                lastCreatedAt=chat.getCreatedAt();
+                                texts.add(chat.getContent());
+                            }
+                            x=x+lastDate.before(thisDate);
+
+                        } catch (ParseException e1) {
+                            e1.printStackTrace();
+                        }
+
 
 
                     }
