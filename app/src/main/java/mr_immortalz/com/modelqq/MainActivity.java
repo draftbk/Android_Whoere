@@ -518,7 +518,6 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
                         }
 
 
-
                     }
                     texts.add("这是沈立凡和曹德福的计网课设~");
                     mBarrageRelativeLayout.setBarrageTexts(texts);
