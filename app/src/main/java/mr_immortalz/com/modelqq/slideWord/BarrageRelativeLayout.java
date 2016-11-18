@@ -11,6 +11,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.text.TextPaint;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
@@ -82,8 +83,11 @@ public class BarrageRelativeLayout extends RelativeLayout {
 
     public void show(int type){
         int duration = (int) ((BARRAGE_GAP_MAX_DURATION - BARRAGE_GAP_MIN_DURATION) * Math.random());
-        mHandler.sendEmptyMessageDelayed(type, duration);
+//        mHandler.sendEmptyMessageDelayed(type, duration);
+//        slf改的源码，上面是他的
+        mHandler.sendEmptyMessage(type);
     }
+
 
     //显示一批弹幕文本
     //相当于给弹幕设置数据源
@@ -189,7 +193,6 @@ public class BarrageRelativeLayout extends RelativeLayout {
         public BarrageTextItem() {
 
         }
-
         public BarrageTextItem(String text) {
             this.textSize = (int) (minSize + (maxSize - minSize) * Math.random());
             this.text = text;
@@ -205,7 +208,9 @@ public class BarrageRelativeLayout extends RelativeLayout {
                 lineHeight = getLineHeight();
                 totalLine = totalHeight / lineHeight;
             }
-            verticalPos = random.nextInt(totalLine) * lineHeight;
+//            Log.e("test","totalLine...."+totalLine);
+//            totalLine=1000;
+            verticalPos = (int) (Math.random()*totalHeight);
         }
     }
 }

@@ -65,7 +65,7 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
     private RadarViewGroup radarViewGroup;
     private LocationManager manager;
     private ViewpagerAdapter mAdapter;
-    private String lastCreatedAt="2016-11-12 14:07:37";
+    private String lastCreatedAt="2016-11-18 11:07:37";
     private BarrageRelativeLayout mBarrageRelativeLayout;
     private double lat;
     private double lon;
@@ -80,7 +80,7 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
     private ArrayList<String> otherID=new ArrayList<String>();
     private boolean isFirst=true;
     private user thisUser;
-    private Handler han;
+    private Handler han,hanChat;
     private LinkedList<String> texts;
 
     @Override
@@ -89,6 +89,7 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
         setContentView(R.layout.activity_main);
         Bmob.initialize(this, "1b2551067b01b0765269eb6f4c4efd2c");
         thisUser=new user();
+        otherID.add(thisUser.getUser_id());
         addData("我",0.0);
         getGps();
         initView();
@@ -110,9 +111,14 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
             public boolean handleMessage(Message msg) {
 //                toast("我在监听"+msg.what);
                 searchAround();
-//                mAdapter.notifyDataSetChanged();
-//                监听弹幕
                 getChat();
+                return false;
+            }
+        });
+        hanChat=new Handler(new Handler.Callback() {
+            @Override
+            public boolean handleMessage(Message msg) {
+//                监听弹幕
 
                 return false;
             }
@@ -144,13 +150,12 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
 
     private void initSlide() {
         mBarrageRelativeLayout = (BarrageRelativeLayout) findViewById(R.id.barrageView);
-
-
         texts=new LinkedList<String>();
         texts.add("我是萌萌的弹幕~");
         texts.add("这是沈立凡和曹德福的计网课设~");
         mBarrageRelativeLayout.setBarrageTexts(texts);
         mBarrageRelativeLayout.show(BarrageRelativeLayout.RANDOM_SHOW);
+        getChat();
 
     }
 
@@ -382,7 +387,6 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
                 public void onClick(View v) {
                     Toast.makeText(MainActivity.this, "这是 " + info.getName() + " >.<", Toast.LENGTH_SHORT).show();
                     if (info.getName().equals("我")){
-                        toast("我要发消息");
                         showMessageDialog();
 
                     }
@@ -463,7 +467,6 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 loadChat(editMsg.getText().toString());
-                getChat();
             }
         });
         builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
@@ -495,11 +498,19 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
 //返回50条数据，如果不加上这条语句，默认返回10条数据
         query.setLimit(50);
 //执行查询方法
+
+//        query.addWhereContainedIn("user_id", Arrays.asList(otherID));
+//        String[] ids = new String[otherID.size()];
+//        for (int i=0;i<otherID.size();i++){
+//            ids[i]=otherID.get(i);
+//        }
+//        query.addWhereContainedIn("user_id", Arrays.asList(ids));
         query.findObjects(new FindListener<Chat>() {
             @Override
             public void done(List<Chat> object, BmobException e) {
                 if(e==null){
                     texts.clear();
+                    texts.add("");
                     String x="";
                     for (Chat chat : object) {
                         chat.getContent();
@@ -516,11 +527,16 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
                         } catch (ParseException e1) {
                             e1.printStackTrace();
                         }
+                    }
+                    Log.e("test","x....."+x);
+                    Log.e("test","texts.size()....."+texts.size());
+                    if (texts.size()>1){
+                        mBarrageRelativeLayout.setBarrageTexts(texts);
+                        mBarrageRelativeLayout.show(BarrageRelativeLayout.RANDOM_SHOW);
 
                     }
-                    texts.add("这是沈立凡和曹德福的计网课设~");
-                    mBarrageRelativeLayout.setBarrageTexts(texts);
-                    mBarrageRelativeLayout.show(BarrageRelativeLayout.RANDOM_SHOW);
+
+
 
                 }else{
                     Log.i("bmob","失败："+e.getMessage()+","+e.getErrorCode());
