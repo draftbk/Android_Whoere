@@ -42,6 +42,7 @@ import java.util.List;
 
 import cn.bmob.v3.Bmob;
 import cn.bmob.v3.BmobQuery;
+import cn.bmob.v3.datatype.BmobDate;
 import cn.bmob.v3.exception.BmobException;
 import cn.bmob.v3.listener.FindListener;
 import cn.bmob.v3.listener.SaveListener;
@@ -89,6 +90,7 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
         setContentView(R.layout.activity_main);
         Bmob.initialize(this, "1b2551067b01b0765269eb6f4c4efd2c");
         thisUser=new user();
+
         otherID.add(thisUser.getUser_id());
         addData("我",0.0);
         getGps();
@@ -111,6 +113,7 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
             public boolean handleMessage(Message msg) {
 //                toast("我在监听"+msg.what);
                 searchAround();
+                Log.e("test","...han");
                 getChat();
                 return false;
             }
@@ -494,6 +497,7 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
     }
 
     private void getChat(){
+        Log.e("test","...getchat");
         BmobQuery<Chat> query = new BmobQuery<Chat>();
 //返回50条数据，如果不加上这条语句，默认返回10条数据
         query.setLimit(50);
@@ -505,42 +509,42 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
 //            ids[i]=otherID.get(i);
 //        }
 //        query.addWhereContainedIn("user_id", Arrays.asList(ids));
+        Log.e("test","...lastCreatedAt"+lastCreatedAt);
+        final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        try {
+            Date lastDate = sdf.parse(lastCreatedAt);
+            query.addWhereGreaterThanOrEqualTo("createdAt",new BmobDate(lastDate));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
         query.findObjects(new FindListener<Chat>() {
             @Override
             public void done(List<Chat> object, BmobException e) {
                 if(e==null){
                     texts.clear();
                     texts.add("");
-                    String x="";
+
                     for (Chat chat : object) {
                         chat.getContent();
-                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                        try {
-                            Date lastDate = sdf.parse(lastCreatedAt);
-                            Date thisDate = sdf.parse(chat.getCreatedAt());
-                            if (lastDate.before(thisDate)){
-                                lastCreatedAt=chat.getCreatedAt();
-                                texts.add(chat.getContent());
-                            }
-                            x=x+lastDate.before(thisDate);
-
-                        } catch (ParseException e1) {
-                            e1.printStackTrace();
-                        }
+                        Log.e("test","chat.getCreatedAt()"+chat.getCreatedAt()+"..."+chat.getContent());
+                        lastCreatedAt=chat.getCreatedAt();
+                        texts.add(chat.getContent());
                     }
-                    Log.e("test","x....."+x);
-                    Log.e("test","texts.size()....."+texts.size());
                     if (texts.size()>1){
+                        Log.e("test","......1");
                         mBarrageRelativeLayout.setBarrageTexts(texts);
+                        Log.e("test","......2");
                         mBarrageRelativeLayout.show(BarrageRelativeLayout.RANDOM_SHOW);
-
+                        Log.e("test","......3");
                     }
 
 
 
                 }else{
-                    Log.i("bmob","失败："+e.getMessage()+","+e.getErrorCode());
+                    Log.i("test","失败："+e.getMessage()+","+e.getErrorCode());
                 }
+//                getChat();
             }
         });
     }

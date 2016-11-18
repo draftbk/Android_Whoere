@@ -31,9 +31,12 @@ public class BarrageRelativeLayout extends RelativeLayout {
             super.handleMessage(msg);
 
             if(msg.what==RANDOM_SHOW) {
-                String text = texts.get(random.nextInt(texts.size()));
-                BarrageTextItem item = new BarrageTextItem(text);
-                showBarrageItem(item);
+                for (int i=0;i<texts.size();i++){
+                    String text = texts.get(i);
+                    BarrageTextItem item = new BarrageTextItem(text);
+                    showBarrageItem(item);
+                }
+
 
                 //每个弹幕产生的间隔时间随机
 //                下面两句就是弹幕一直产生的原因--注销就没事了~
@@ -92,6 +95,7 @@ public class BarrageRelativeLayout extends RelativeLayout {
     //显示一批弹幕文本
     //相当于给弹幕设置数据源
     public void setBarrageTexts(LinkedList<String> texts) {
+        Log.e("test","......set");
         this.texts = texts;
     }
 
@@ -118,18 +122,19 @@ public class BarrageRelativeLayout extends RelativeLayout {
         anim.setAnimationListener(new Animation.AnimationListener() {
             @Override
             public void onAnimationStart(Animation animation) {
-
+                Log.e("test","......start");
             }
 
             @Override
             public void onAnimationEnd(Animation animation) {
                 item.textView.clearAnimation();
                 BarrageRelativeLayout.this.removeView(item.textView);
+                Log.e("test","......end");
             }
 
             @Override
             public void onAnimationRepeat(Animation animation) {
-
+                Log.e("test","......repeat");
             }
         });
         item.textView.startAnimation(anim);

@@ -7,7 +7,7 @@
 
 
     <TextView
-        android:text="沈\n立\n凡\n的\n计\n网\n课\n设"
+        android:text="使\n用\n请\n打\n开\nG\nP\nS"
         android:textColor="@color/colorPrimary"
         android:textSize="40dp"
         android:gravity="center"
