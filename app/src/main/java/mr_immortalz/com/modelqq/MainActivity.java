@@ -39,6 +39,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Random;
 
 import cn.bmob.v3.Bmob;
 import cn.bmob.v3.BmobQuery;
@@ -219,7 +220,7 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
         lon=location.getLongitude();
 //        这里要上传位置信息并且得到周围的人
         thisUser.setUser_id((lat+"").substring(2,4)+(lon+"").substring(2,4)+(Math.random()*(10000)));
-        thisUser.setName("路人甲");
+        thisUser.setName(mNames[new Random().nextInt(mNames.length-1)]);
         thisUser.setLat(lat+"");
         thisUser.setLon(lon+"");
         thisUser.save(new SaveListener<String>() {
