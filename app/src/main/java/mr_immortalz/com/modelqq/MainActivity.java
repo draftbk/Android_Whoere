@@ -91,7 +91,6 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
         setContentView(R.layout.activity_main);
         Bmob.initialize(this, "1b2551067b01b0765269eb6f4c4efd2c");
         thisUser=new user();
-
         otherID.add(thisUser.getUser_id());
         addData("我",0.0);
         getGps();
