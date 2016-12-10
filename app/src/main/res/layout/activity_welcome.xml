@@ -7,7 +7,7 @@
 
 
     <TextView
-        android:text="使\n用\n请\n打\n开\nG\nP\nS"
+        android:text="更\n快\n捷\n的\n沟\n通\n方\n式"
         android:textColor="@color/colorPrimary"
         android:textSize="40dp"
         android:gravity="center"

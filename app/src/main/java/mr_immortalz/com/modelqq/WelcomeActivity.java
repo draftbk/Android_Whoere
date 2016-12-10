@@ -1,13 +1,16 @@
 package mr_immortalz.com.modelqq;
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -43,6 +46,7 @@ public class WelcomeActivity extends AppCompatActivity {
         setContentView(R.layout.activity_welcome);
         Bmob.initialize(this, "1b2551067b01b0765269eb6f4c4efd2c");
         thisUser=new user();
+        initGPS();
         getGps();
 //        final Intent it = new Intent(WelcomeActivity.this, MainActivity.class); //你要转向的Activity
 //        Timer timer = new Timer();
@@ -119,5 +123,45 @@ public class WelcomeActivity extends AppCompatActivity {
 
     private void toast(String s) {
         Toast.makeText(WelcomeActivity.this,s,Toast.LENGTH_SHORT).show();
+    }
+    private void initGPS() {
+        LocationManager locationManager = (LocationManager) this
+                .getSystemService(Context.LOCATION_SERVICE);
+        // 判断GPS模块是否开启，如果没有则开启
+        if (!locationManager
+                .isProviderEnabled(android.location.LocationManager.GPS_PROVIDER)) {
+            Toast.makeText(WelcomeActivity.this, "请打开GPS",
+                    Toast.LENGTH_SHORT).show();
+            AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+            dialog.setMessage("请打开GPS");
+            dialog.setPositiveButton("确定",
+                    new android.content.DialogInterface.OnClickListener() {
+
+                        @Override
+                        public void onClick(DialogInterface arg0, int arg1) {
+
+                            // 转到手机设置界面，用户设置GPS
+                            Intent intent = new Intent(
+                                    Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                            startActivity(intent); // 设置完成后返回到原来的界面
+                            finish();
+                        }
+                    });
+            dialog.setNeutralButton("取消", new android.content.DialogInterface.OnClickListener() {
+
+                @Override
+                public void onClick(DialogInterface arg0, int arg1) {
+                    arg0.dismiss();
+                }
+            } );
+            dialog.show();
+        } else {
+            // 弹出Toast
+//          Toast.makeText(TrainDetailsActivity.this, "GPS is ready",
+//                  Toast.LENGTH_LONG).show();
+//          // 弹出对话框
+//          new AlertDialog.Builder(this).setMessage("GPS is ready")
+//                  .setPositiveButton("OK", null).show();
+        }
     }
 }
