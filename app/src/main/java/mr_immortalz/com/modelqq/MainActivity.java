@@ -89,6 +89,9 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");//设置日期格式
+        lastCreatedAt=df.format(new Date());// new Date()为获取当前系统时间
+        lastCreatedAt=lastCreatedAt+" 00:00:00";
         Bmob.initialize(this, "1b2551067b01b0765269eb6f4c4efd2c");
         thisUser = new user();
         otherID.add(thisUser.getUser_id());
@@ -226,7 +229,7 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
             @Override
             public void done(String objectId,BmobException e) {
                 if(e==null){
-                    toast("添加数据成功，返回objectId为："+objectId);
+                    toast("你的临时姓名："+thisUser.getName());
                     searchThread();
                 }else{
                     toast("创建数据失败：" + e.getMessage());
@@ -302,10 +305,11 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
         info.setPortraitId(mImgs[(int) (1+Math.random()*12)]);
         info.setAge(((int) Math.random() * 25 + 16) + "岁");
         info.setName(name);
-        info.setSex((Math.random()*10)% 3 == 0 ? false : true);
+        int a= (int) ((Math.random()*10)%2);
+        info.setSex(a == 0 ? false : true);
         info.setDistance((float) (dis/1000));
         mDatas.put(mDatas.size(), info);
-        Log.d("test","....."+1);
+        Log.e("test","info.getSex()....."+a);
     }
 
     private void toast(String s) {
@@ -437,11 +441,23 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
     @Override
     protected void onStop() {
         super.onStop();
+        thisUser.delete(new UpdateListener() {
+
+            @Override
+            public void done(BmobException e) {
+                if(e==null){
+                    toast("删除临时用户:"+thisUser.getName());
+                }else{
+                    toast("退出");
+                }
+            }
+
+        });
     }
 
     @Override
     protected void onDestroy() {
-
+        super.onDestroy();
         thisUser.delete(new UpdateListener() {
 
             @Override
@@ -454,7 +470,6 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
             }
 
         });
-        super.onDestroy();
     }
 
     private void showMessageDialog() {
