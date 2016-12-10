@@ -12,8 +12,6 @@
         android:layout_width="match_parent"
         android:layout_height="30dp" />
 
-
-
     <EditText
         android:id="@+id/edit_msg"
         android:gravity="center"
@@ -23,11 +21,6 @@
         android:layout_marginRight="20dp"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content" />
-
-
-
-
-
 
 
 

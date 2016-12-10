@@ -29,7 +29,6 @@ import mr_immortalz.com.modelqq.been.user;
 import mr_immortalz.com.modelqq.tools.LocationTools;
 
 public class WelcomeActivity extends AppCompatActivity {
-    private Location location;
     private LocationManager manager;
     private boolean isFirst=true;
     private user thisUser;
@@ -63,7 +62,6 @@ public class WelcomeActivity extends AppCompatActivity {
             return;
         }
         //如果要用GPS就把下面的NETWORK_PROVIDER改成GPS_PROVIDER,但是GPS不稳定
-        location = manager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
         manager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 5000, 1, locationLinstener);
     }
     LocationListener locationLinstener=new LocationListener() {
@@ -73,7 +71,6 @@ public class WelcomeActivity extends AppCompatActivity {
                 loadLocation(location);
                 isFirst=false;
             }
-
         }
         @Override
         public void onStatusChanged(String provider, int status, Bundle extras) {
@@ -88,7 +85,6 @@ public class WelcomeActivity extends AppCompatActivity {
     private void loadLocation(Location location) {
         lat=location.getLatitude();
         lon=location.getLongitude();
-
         thisUser.setUser_id((lat+"").substring(2,4)+(lon+"").substring(2,4)+(Math.random()*(10000)));
         thisUser.setName("路人甲");
         thisUser.setLat(lat+"");
@@ -108,7 +104,6 @@ public class WelcomeActivity extends AppCompatActivity {
 
     private void delete() {
         thisUser.delete(new UpdateListener() {
-
             @Override
             public void done(BmobException e) {
                 if(e==null){

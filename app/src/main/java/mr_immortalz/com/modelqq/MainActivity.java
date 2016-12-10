@@ -67,7 +67,7 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
     private RadarViewGroup radarViewGroup;
     private LocationManager manager;
     private ViewpagerAdapter mAdapter;
-    private String lastCreatedAt="2016-11-18 11:07:37";
+    private String lastCreatedAt = "2016-12-10 11:07:37";
     private BarrageRelativeLayout mBarrageRelativeLayout;
     private double lat;
     private double lon;
@@ -75,14 +75,14 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
     private int[] mImgs = {R.drawable.len, R.drawable.leo, R.drawable.lep,
             R.drawable.leq, R.drawable.ler, R.drawable.les, R.drawable.mln, R.drawable.mmz, R.drawable.mna,
             R.drawable.mnj, R.drawable.leo, R.drawable.leq, R.drawable.les, R.drawable.lep};
-    private String[] mNames = {"是谁", "唐马儒", "王尼玛", "张全蛋", "蛋花", "王大锤", "叫兽", "哆啦A梦"};
+    private String[] mNames = {"小红", "唐马儒", "王尼玛", "张全蛋", "蛋花", "王大锤", "叫兽", "哆啦A梦"};
     private int mPosition;
     private FixedSpeedScroller scroller;
     private SparseArray<Info> mDatas = new SparseArray<>();
-    private ArrayList<String> otherID=new ArrayList<String>();
-    private boolean isFirst=true;
+    private ArrayList<String> otherID = new ArrayList<String>();
+    private boolean isFirst = true;
     private user thisUser;
-    private Handler han,hanChat;
+    private Handler han, hanChat;
     private LinkedList<String> texts;
 
     @Override
@@ -90,9 +90,9 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Bmob.initialize(this, "1b2551067b01b0765269eb6f4c4efd2c");
-        thisUser=new user();
+        thisUser = new user();
         otherID.add(thisUser.getUser_id());
-        addData("我",0.0);
+        addData("我", 0.0);
         getGps();
         initView();
         initData();
@@ -108,17 +108,17 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
             }
         });
 //        初始化handler
-        han=new Handler(new Handler.Callback() {
+        han = new Handler(new Handler.Callback() {
             @Override
             public boolean handleMessage(Message msg) {
 //                toast("我在监听"+msg.what);
                 searchAround();
-                Log.e("test","...han");
+                Log.e("test", "...han");
                 getChat();
                 return false;
             }
         });
-        hanChat=new Handler(new Handler.Callback() {
+        hanChat = new Handler(new Handler.Callback() {
             @Override
             public boolean handleMessage(Message msg) {
 //                监听弹幕
@@ -153,7 +153,7 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
 
     private void initSlide() {
         mBarrageRelativeLayout = (BarrageRelativeLayout) findViewById(R.id.barrageView);
-        texts=new LinkedList<String>();
+        texts = new LinkedList<String>();
         texts.add("我是萌萌的弹幕~");
         texts.add("这是沈立凡和曹德福的计网课设~");
         mBarrageRelativeLayout.setBarrageTexts(texts);
@@ -187,11 +187,11 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
 
     private void getGps() {
         manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        //检查权限
+
+        //如果要用GPS就把下面的NETWORK_PROVIDER改成GPS_PROVIDER,但是GPS不稳定
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
-        //如果要用GPS就把下面的NETWORK_PROVIDER改成GPS_PROVIDER,但是GPS不稳定
         location = manager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
         manager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 5000, 1, locationLinstener);
     }
